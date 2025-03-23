@@ -31,3 +31,14 @@ how to run this application
 
 1. run DB file : python sqllitedb.py - it generates a DB file banking-system
 2. run app.py : after few minutues applicaiton will come up in localhost:5000
+
+
+how to run Recommdentation code
+install python 3.12.5 or any version 3.12.*
+python.exe -m pip install --upgrade pip
+pip install --upgrade setuptools
+pip install tensorflow-recommenders tensorflow
+pip install tensorflow tensorflow-recommenders pandas numpy scikit-learn
+pip install tensorflow_datasets
+
+python filename.py
