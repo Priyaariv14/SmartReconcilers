@@ -1,0 +1,6 @@
+transformers==4.50.0
+lightfm==1.17
+scipy==1.10.0
+numpy==1.26.4
+spacy==3.5.0
+Flask==2.0.1

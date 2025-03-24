@@ -27,7 +27,4 @@ insurance, card(debit/cards),FDs,RDs,SIP(Mutual Funds)
 4. Social media activities/sentiment analysis : Priya
 
 
-how to run this application
-
-1. run DB file : python sqllitedb.py - it generates a DB file banking-system
-2. run app.py : after few minutues applicaiton will come up in localhost:5000
+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

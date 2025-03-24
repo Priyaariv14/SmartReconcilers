@@ -5,106 +5,174 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Dashboard</title>
     <style>
+        /* General Styling */
         body {
-            font-family: Arial, sans-serif;
+            font-family: 'Arial', sans-serif;
             margin: 0;
             padding: 0;
-            background-color: #f4f4f4;
+            background-color: #f1f2f6;
+            color: #333;
         }
 
         header {
             background-color: #4CAF50;
             color: white;
-            padding: 10px 0;
+            padding: 15px 0;
             text-align: center;
+            font-size: 32px;
+            font-weight: bold;
         }
 
         .container {
             max-width: 1200px;
-            margin: 20px auto;
-            padding: 20px;
-            background-color: white;
-            border-radius: 8px;
-            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            margin: 30px auto;
+            padding: 30px;
+            background-color: #fff;
+            border-radius: 12px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
         }
 
-        h1 {
-            font-size: 28px;
+        h1, h2, h3 {
+            font-size: 26px;
             color: #333;
         }
 
-        h2 {
-            font-size: 22px;
-            color: #333;
-            margin-top: 20px;
-        }
-
+        /* Pie Chart Container */
         .pie-chart-container {
             display: flex;
             justify-content: center;
             align-items: center;
-            margin: 20px 0;
-            height: 400px;
+            margin: 30px 0;
             width: 100%;
         }
 
         .pie-chart-container img {
-            max-width: 100%;
+            max-width: 70%;
             height: auto;
-            border-radius: 8px;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+            border-radius: 12px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
         }
 
+        /* Section Styling */
         .notifications,
         .recommendations,
-        .investment-strategy,
-        .product-recommendations {
-            margin-top: 20px;
-            padding: 15px;
+        .investment-strategy {
+            margin-top: 30px;
+            padding: 20px;
             background-color: #fff;
-            border-radius: 8px;
-            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            border-radius: 12px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
         }
 
         .notifications h3,
         .recommendations h3,
-        .investment-strategy h3,
-        .product-recommendations h3 {
+        .investment-strategy h3 {
+            font-size: 22px;
+            color: #333;
+            font-weight: bold;
+            margin-bottom: 15px;
+        }
+
+        /* Notifications Styling */
+        .notifications ul,
+        .product-recommendations ul {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+
+        .notifications li {
+            background-color: #f9f9f9;
+            padding: 12px;
+            border-radius: 8px;
+            margin-bottom: 10px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+        }
+
+        /* Recommendation Section Styling */
+        .recommendations {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: space-between;
+            gap: 20px;
+        }
+
+        .recommendation-card {
+            background-color: #f9f9f9;
+            border-radius: 12px;
+            padding: 20px;
+            width: calc(33% - 20px);
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+            transition: transform 0.3s ease;
+        }
+
+        .recommendation-card:hover {
+            transform: translateY(-10px);
+        }
+
+        .recommendation-card img {
+            width: 100%;
+            height: auto;
+            border-radius: 12px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+        }
+
+        .recommendation-card h4 {
             font-size: 20px;
             color: #333;
+            margin-top: 15px;
+            margin-bottom: 10px;
         }
 
-        .card {
-            background-color: #f9f9f9;
-            border-radius: 8px;
-            padding: 15px;
-            margin: 10px 0;
-            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-        }
-
-        .card p {
+        .recommendation-card p {
             font-size: 16px;
             color: #555;
+            line-height: 1.5;
         }
 
-        .card ul {
-            list-style-type: none;
+        .card-container {
             padding: 0;
         }
 
-        .card ul li {
-            padding: 8px 0;
+        /* Responsive Design */
+        @media screen and (max-width: 768px) {
+            .pie-chart-container img {
+                max-width: 100%;
+            }
+
+            header {
+                font-size: 28px;
+            }
+
+            .container {
+                padding: 20px;
+                margin: 20px;
+            }
+
+            h1, h2, h3 {
+                font-size: 22px;
+            }
+
+            .notifications li {
+                font-size: 14px;
+            }
+
+            .recommendation-card {
+                width: calc(50% - 20px);
+            }
         }
 
-        .card ul li span {
-            font-weight: bold;
+        @media screen and (max-width: 480px) {
+            .recommendation-card {
+                width: 100%;
+            }
         }
-
     </style>
 </head>
 <body>
     <header>
-        <h1>Welcome, {{ user_data[1] }}!</h1>
+        Welcome, {{ user_data[1] }}!
     </header>
 
     <div class="container">
@@ -126,28 +194,25 @@
             {% endif %}
         </div>
 
-        <div class="recommendations">
-            <h3>Personalized Recommendations</h3>
-            <div class="card">
-                <p>{{ recommendations }}</p>
-            </div>
-        </div>
-
+		<div class="recommendations">
+			<h2>Your Personalized Recommendations</h2>
+			<div class="recommendation-cards">
+				{% for recommendation in recommendations %}
+					<div class="recommendation-card">
+						<h3>{{ recommendation.item }}</h3>
+						{% if recommendation.image_url %}
+							<img src="{{ recommendation.image_url }}" alt="{{ recommendation.item }}" />
+						{% else %}
+							<p>No image available</p>
+						{% endif %}
+					</div>
+				{% endfor %}
+			</div>
+		</div>
         <div class="investment-strategy">
             <h3>Investment Strategy</h3>
             <div class="card">
                 <p>{{ investment_strategy }}</p>
-            </div>
-        </div>
-
-        <div class="product-recommendations">
-            <h3>Product Recommendations</h3>
-            <div class="card">
-                <ul>
-                    {% for product in product_recommendations %}
-                        <li><span>Recommendation:</span> {{ product }}</li>
-                    {% endfor %}
-                </ul>
             </div>
         </div>
     </div>

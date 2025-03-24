@@ -48,14 +48,23 @@ cursor.execute('''
     )
 ''')
 
+cursor.execute('''
+    CREATE TABLE recommendations (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        product_name TEXT NOT NULL,
+        image_url TEXT NOT NULL,
+        description TEXT NOT NULL
+    )
+''')
+
 # Insert test data into the 'users' table
 cursor.execute('''
     INSERT INTO users (username, password, email, income, expenses, savings_goal, risk_tolerance, investment_goals, credit_score)
-    VALUES ('priya', 'password123', 'john@example.com', 6000, 2000, 10000, 'medium', 'Retirement planning', 720),
-           ('priya1', 'password456', 'jane@example.com', 4500, 1500, 5000, 'high', 'Real estate investment', 690)
+    VALUES ('Priya', 'password123', 'priya@example.com', 6000, 2000, 10000, 'medium', 'Retirement planning', 720),
+           ('Priya1', 'password456', 'priya1@example.com', 4500, 1500, 5000, 'high', 'Real estate investment', 690)
 ''')
 
-# Insert test data into the 'transactions' table for user 'john_doe' (user_id = 1)
+# Insert test data into the 'transactions' table for  (user_id = 1)
 cursor.execute('''
     INSERT INTO transactions (user_id, date, description, amount)
     VALUES (1, '2025-03-01', 'Grocery Store', -150),
@@ -65,7 +74,7 @@ cursor.execute('''
            (1, '2025-03-05', 'Subscription Service', -20)
 ''')
 
-# Insert test data into the 'transactions' table for user 'jane_smith' (user_id = 2)
+# Insert test data into the 'transactions' table for  (user_id = 2)
 cursor.execute('''
     INSERT INTO transactions (user_id, date, description, amount)
     VALUES (2, '2025-03-01', 'Movie Tickets', -30),
@@ -87,6 +96,20 @@ cursor.execute('''
     INSERT INTO loan_account (user_id, loan_balance, interest_rate)
     VALUES (1, 2500, 5.5),
            (2, 1500, 7.0)
+''')
+
+cursor.execute('''
+        INSERT INTO recommendations (product_name, image_url, description)
+        VALUES
+        ('High-Yield Savings', 'https://cdn-icons-png.flaticon.com/512/586/586121.png', 'Earn higher interest rates with a high-yield savings account.'),
+        ('Personal Loan', 'https://cdn-icons-png.flaticon.com/512/4630/4630893.png', 'Get funds quickly with a personal loan to cover your needs.'),
+        ('Investment Plan', 'https://cdn-icons-png.flaticon.com/512/2974/2974977.png', 'Grow your wealth with a personalized investment plan.'),
+        ('Customer Support', 'https://cdn-icons-png.flaticon.com/512/3515/3515192.png', 'Our customer service team is here to help you with all your queries.'),
+        ('Complaints Resolution', 'https://cdn-icons-png.flaticon.com/512/1142/1142494.png', 'Resolve your issues with our efficient complaints resolution service.'),
+        ('Credit Card', 'https://cdn-icons-png.flaticon.com/512/5968/5968764.png', 'Manage your expenses with a flexible and reliable credit card.'),
+        ('Mortgage', 'https://cdn-icons-png.flaticon.com/512/2762/2762470.png', 'Get the best rates on mortgages for your dream home.'),
+        ('Retirement Plan', 'https://cdn-icons-png.flaticon.com/512/1077/1077012.png', 'Save for a secure and comfortable retirement with our plans.'),
+        ('Car Loan', 'https://cdn-icons-png.flaticon.com/512/1654/1654027.png', 'Drive your dream car with our flexible car loan options.');
 ''')
 
 # Commit the changes and close the connection
