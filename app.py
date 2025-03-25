@@ -15,6 +15,14 @@ from lightfm.data import Dataset
 from scipy.sparse import coo_matrix
 import numpy as np
 import spacy
+import faiss
+import numpy as np
+from sentence_transformers import SentenceTransformer
+from vaderSentiment.vaderSentiment import SentimentIntensityAnalyzer
+from transformers import pipeline
+from collections import defaultdict
+from langchain.memory import ConversationBufferMemory
+from langchain.schema import HumanMessage, AIMessage
 
 
 # Initialize Flask app
@@ -388,6 +396,84 @@ def generate_pie_chart(transaction_categories):
     
     return img_base64
     
+def get_chat_based_recommendations(user_query, user_id):
+        # Load models
+    embedding_model = SentenceTransformer("sentence-transformers/all-MiniLM-L6-v2")
+    
+
+    # Recommendation dataset
+    recommendation_data = {
+        "loan": {
+            "positive": "Great! Loans can help you achieve your goals. Consider a Home Loan or a Personal Loan.",
+            "neutral": "Loans are available based on your needs. You can explore Personal, Home, or Auto Loans.",
+            "negative": "Loans can be risky if not managed well. Consider reviewing your repayment capacity before applying."
+        },
+        "fraud": {
+            "positive": "It's good to stay vigilant! Enable fraud alerts and monitor transactions regularly.",
+            "neutral": "If you suspect fraud, contact customer service and review your recent transactions.",
+            "negative": "Fraud is a serious issue. You should freeze your account and report the incident immediately."
+        },
+        "investment": {
+            "positive": "Investing is a great step toward financial growth! You might like Mutual Funds or Stocks.",
+            "neutral": "Investments depend on your risk appetite. Options include Fixed Deposits, Bonds, and Mutual Funds.",
+            "negative": "If you're unsure about investments, consider consulting a financial advisor before proceeding."
+        }
+    }
+
+    # Convert recommendation keys into vectors
+    keys = list(recommendation_data.keys())
+    key_embeddings = embedding_model.encode(keys)
+
+    # Create FAISS index
+    dimension = key_embeddings.shape[1]
+    faiss_index = faiss.IndexFlatL2(dimension)
+    faiss_index.add(np.array(key_embeddings))
+
+    # LangChain memory to store chat history
+    memory = ConversationBufferMemory()
+
+    # User history storage (tracks topics and sentiments)
+    user_history = defaultdict(lambda: {"count": 0, "sentiments": []})
+    
+    """Find the closest recommendation and personalize it using sentiment & history."""
+    query_embedding = embedding_model.encode([user_query])
+    distances, indices = faiss_index.search(query_embedding, k=1)
+
+    if indices[0][0] == -1:
+        return "I couldn't find a relevant recommendation."
+
+    matched_key = keys[indices[0][0]]
+    sentiment = get_sentiment(user_query)
+
+    # Update user history
+    user_history[user_id]["count"] += 1
+    user_history[user_id]["sentiments"].append(sentiment)
+
+    if user_history[user_id]["count"] > 2:
+        frequent_topic = max(set(user_history[user_id]["sentiments"]), key=user_history[user_id]["sentiments"].count)
+        return f"Based on your past interactions, you seem interested in {matched_key}. {recommendation_data[matched_key].get(frequent_topic, 'Here is a general suggestion.')}"
+    present_recommendation = recommendation_data[matched_key].get(sentiment, "I don't have a recommendation for that.")
+    memory.save_context({"input": user_query}, {"output": present_recommendation})
+    return present_recommendation
+    
+def get_sentiment(user_query):
+    sentiment_model = pipeline("sentiment-analysis")
+    vader_analyzer = SentimentIntensityAnalyzer()
+    """Analyze sentiment using both VADER and a transformer-based model."""
+    vader_score = vader_analyzer.polarity_scores(user_query)['compound']
+    sentiment_label = sentiment_model(user_query)[0]['label'].lower()
+
+    if vader_score > 0.2:
+        return "positive"
+    elif vader_score < -0.2:
+        return "negative"
+    return "neutral"
+
+
+def get_chat_history():
+    return memory.load_memory_variables({})
+
+    
     
 # Implement your functions and routes here (e.g., to handle user requests)
 @app.route('/')
@@ -436,6 +522,17 @@ def dashboard():
     else:
         return "User data not found"
 
+@app.route('/chat',methods=['POST','GET'])
+def chat():
+    recommendation = None
+    if request.method == "POST":
+        user_query = request.form.get("user_input")
+        user_id = "user123"  # Simulating a unique user
+        if user_query:
+            recommendation = get_chat_based_recommendations(user_query, user_id)
+            
+    return render_template("chat_interface.html", recommendation=recommendation )
+    
 # Route to handle login form submission
 @app.route('/login', methods=['POST'])
 def handle_login():

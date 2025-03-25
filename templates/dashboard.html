@@ -13,7 +13,7 @@
             background-color: #f1f2f6;
             color: #333;
         }
-
+		
         header {
             background-color: #4CAF50;
             color: white;
@@ -168,11 +168,20 @@
                 width: 100%;
             }
         }
+		
+		 .chat-icon {
+				font-size: 30px;
+				cursor: pointer;
+				position: fixed;
+				bottom: 20px;
+				right: 20px;
+			}
     </style>
+
 </head>
 <body>
     <header>
-        Welcome, {{ user_data[1] }}!
+        Welcome,User!
     </header>
 
     <div class="container">
@@ -215,6 +224,12 @@
                 <p>{{ investment_strategy }}</p>
             </div>
         </div>
+		<p>Click the chat icon to start a conversation.</p>
+
+    <!-- Chat icon (Font Awesome or any other icon can be used) -->
+    <a href="{{ url_for('chat') }}">
+        <span class="chat-icon">💬</span>
+    </a>
     </div>
 </body>
 </html>
