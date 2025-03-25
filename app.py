@@ -23,7 +23,7 @@ from transformers import pipeline
 from collections import defaultdict
 from langchain.memory import ConversationBufferMemory
 from langchain.schema import HumanMessage, AIMessage
-
+import recommendations_withcsvdata as prod_recommends
 
 # Initialize Flask app
 app = Flask(__name__)
@@ -510,6 +510,10 @@ def dashboard():
         tweet_recommendations = recommendations_based_on_tweets(username)
         print("tweet recommmendations: ")
         print(tweet_recommendations)
+        
+        products_recommened = prod_recommends.recommend_products(username, top_k=10)
+        print("prod recommmendations: ")
+        print(products_recommened)
         # return render_template('dashboard.html', user_data=user_data, transactions=transactions,
                                # savings_balance=savings_balance, loan_data=loan_data, recommendations=tweet_recommendations,
                                # investment_strategy=investment_strategy, product_recommendations=product_recommendations,

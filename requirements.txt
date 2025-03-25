@@ -11,3 +11,8 @@ plotly==5.10.0
 openai==0.27.0
 torch==2.6.0
 kaleido==0.2.1
+faiss-cpu==1.7.3 
+sentence-transformers==2.2.0 
+vaderSentiment==3.3.2 
+langchain==0.0.125
+huggingface-hub==0.28.0
