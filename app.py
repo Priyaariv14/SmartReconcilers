@@ -511,16 +511,16 @@ def dashboard():
         print("tweet recommmendations: ")
         print(tweet_recommendations)
         
-        products_recommened = prod_recommends.recommend_products(username, top_k=10)
+        products_recommened = prod_recommends.recommend_products(f"C_{random.randint(1, 100)}", top_k=10)
         print("prod recommmendations: ")
-        print(products_recommened)
+        print(products_recommened.values.tolist())
         # return render_template('dashboard.html', user_data=user_data, transactions=transactions,
                                # savings_balance=savings_balance, loan_data=loan_data, recommendations=tweet_recommendations,
                                # investment_strategy=investment_strategy, product_recommendations=product_recommendations,
                                # notifications=notifications, categorized_transactions=categorized_transactions,
                                # pie_chart_data=pie_chart_data, username=username)  # Pass the username to the template
         return render_template('dashboard.html', user_data=user_data, transactions=transactions,
-                               recommendations=tweet_recommendations,
+                               recommendations=tweet_recommendations.values.tolist(),
                                categorized_transactions=categorized_transactions,notifications=notifications,investment_strategy=investment_strategy,
                                pie_chart_data=pie_chart_data, username=username)  # Pass the username to the template
     else:
