@@ -1,4 +1,4 @@
-from flask import Flask, render_template, request, redirect, url_for, session
+from flask import Flask, render_template, request, redirect, url_for, session, jsonify
 import sqlite3
 import random
 import secrets
@@ -10,11 +10,11 @@ import base64
 from transformers import GPT2LMHeadModel, GPT2Tokenizer, pipeline, T5ForConditionalGeneration, T5Tokenizer
 import openai  # Import OpenAI for GPT-3 or GPT-4 integration
 import torch
-from lightfm import LightFM
-from lightfm.data import Dataset
-from scipy.sparse import coo_matrix
+#from lightfm import LightFM
+#from lightfm.data import Dataset
+#from scipy.sparse import coo_matrix
 import numpy as np
-import spacy
+#import spacy
 import faiss
 import numpy as np
 from sentence_transformers import SentenceTransformer
@@ -23,7 +23,21 @@ from transformers import pipeline
 from collections import defaultdict
 from langchain.memory import ConversationBufferMemory
 from langchain.schema import HumanMessage, AIMessage
-import recommendations_withcsvdata as prod_recommends
+import sys
+import json
+import queue
+import sounddevice as sd
+from vosk import Model, KaldiRecognizer
+import faiss
+import numpy as np
+from sentence_transformers import SentenceTransformer
+from vaderSentiment.vaderSentiment import SentimentIntensityAnalyzer
+from transformers import pipeline
+from collections import defaultdict
+from langchain.memory import ConversationBufferMemory
+from langchain.schema import HumanMessage, AIMessage
+# Check if the model exists, else download
+import os, requests, zipfile
 
 # Initialize Flask app
 app = Flask(__name__)
@@ -396,6 +410,7 @@ def generate_pie_chart(transaction_categories):
     
     return img_base64
     
+
 def get_chat_based_recommendations(user_query, user_id):
         # Load models
     embedding_model = SentenceTransformer("sentence-transformers/all-MiniLM-L6-v2")
@@ -470,11 +485,62 @@ def get_sentiment(user_query):
     return "neutral"
 
 
+def voice_to_text_model():
+    # Model path (download manually if needed)
+    MODEL_PATH = "models/vosk-model-small-en-us-0.15"
+    MODEL_URL = "https://alphacephei.com/vosk/models/vosk-model-small-en-us-0.15.zip"
+
+    if not os.path.exists(MODEL_PATH):
+        print("Downloading Vosk model...")
+        os.makedirs("models", exist_ok=True)
+        model_zip = "models/vosk_model.zip"
+        
+        with requests.get(MODEL_URL, stream=True) as r:
+            with open(model_zip, "wb") as f:
+                for chunk in r.iter_content(chunk_size=8192):
+                    f.write(chunk)
+        
+        print("Extracting model...")
+        with zipfile.ZipFile(model_zip, "r") as zip_ref:
+            zip_ref.extractall("models")
+        
+        os.remove(model_zip)
+        print("Model downloaded and ready to use.")
+
+    # Load the Vosk model
+    model = Model(MODEL_PATH)
+
+    # Audio queue for real-time processing
+    audio_queue = queue.Queue()
+
+# Callback function to capture audio
+def callback(indata, frames, time, status):
+    if status:
+        print(status, file=sys.stderr)
+    audio_queue.put(bytes(indata))
+
+# Real-time speech recognition
+def real_time_transcription():
+    recognizer = KaldiRecognizer(model, 16000)
+
+    with sd.RawInputStream(samplerate=16000, blocksize=8000, dtype='int16',
+                           channels=1, callback=callback):
+        print("Listening... (Press Ctrl+C to stop)")
+        try:
+            while True:
+                data = audio_queue.get()
+                if recognizer.AcceptWaveform(data):
+                    result = json.loads(recognizer.Result())
+                    print("Transcription:", result["text"])
+        except KeyboardInterrupt:
+            print("\nStopped.")
+    return result["text"]
+
+
+
 def get_chat_history():
     return memory.load_memory_variables({})
 
-    
-    
 # Implement your functions and routes here (e.g., to handle user requests)
 @app.route('/')
 def index():
@@ -534,10 +600,19 @@ def chat():
         user_id = "user123"  # Simulating a unique user
         if user_query:
             recommendation = get_chat_based_recommendations(user_query, user_id)
-            
-    return render_template("chat_interface.html", recommendation=recommendation )
+           
+    bot_response = recommendation
+
+    # Return the response in JSON format
+    return jsonify({"recommendation": bot_response})
+    #return render_template("dashboard.html", recommendation=recommendation )
     
-# Route to handle login form submission
+@app.route('/transcribe', methods=['POST'])
+def transcribe():
+    transcription = transcribe_audio()
+    recommendation = get_chat_based_recommendations(transcription, user_id)
+    return jsonify({"text": transcription, "response": chatbot_response})# Route to handle login form submission
+    
 @app.route('/login', methods=['POST'])
 def handle_login():
     username = request.form['username']
@@ -555,6 +630,7 @@ def handle_login():
         return redirect(url_for('dashboard'))  # Redirect to dashboard route
     else:
         return "Login Failed: Invalid username or password"
+
 
 
 # Start Flask app
