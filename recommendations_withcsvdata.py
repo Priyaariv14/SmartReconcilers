@@ -180,5 +180,3 @@ def recommend_products(customer_id, top_k=10):
     })
     
     return recommended_products
-
-
